@@ -64,6 +64,18 @@ What sync does:
 3. regenerates bundled Pi `skills/`
 4. refreshes bundled `pi-resources/compound-engineering/mcporter.json`
 
+## Test scope
+
+The local test suite is intentionally Pi-focused.
+
+Keep tests here for:
+- Pi converter behavior
+- Pi writer/sync behavior
+- Pi-specific CLI compatibility smoke tests
+- Claude plugin parsing relied on by Pi sync/generation
+
+Do not try to duplicate exhaustive cross-target converter coverage here; that belongs upstream.
+
 ## Safe release workflow
 
 1. Make converter/content changes upstream first
