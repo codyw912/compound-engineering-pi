@@ -3,15 +3,14 @@
   "version": "0.2.4",
   "type": "module",
   "private": false,
-  "description": "Pi-first Compound Engineering extension with subagents and MCPorter compatibility.",
+  "description": "Compound Engineering workflows for Pi — plan, work, review, compound.",
   "keywords": [
     "pi-package",
     "pi",
     "compound-engineering",
-    "mcporter",
-    "subagent",
     "workflow",
-    "agent"
+    "agent",
+    "code-review"
   ],
   "bin": {
     "compound-engineering-pi": "compound-engineering-pi",
@@ -19,13 +18,13 @@
   },
   "license": "MIT",
   "author": "Geet Khosla",
-  "homepage": "https://github.com/gvkhosla/compound-engineering-pi",
+  "homepage": "https://github.com/codyw912/compound-engineering-pi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gvkhosla/compound-engineering-pi.git"
+    "url": "git+https://github.com/codyw912/compound-engineering-pi.git"
   },
   "bugs": {
-    "url": "https://github.com/gvkhosla/compound-engineering-pi/issues"
+    "url": "https://github.com/codyw912/compound-engineering-pi/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -37,10 +36,8 @@
     "bin",
     "src",
     "plugins",
-    "extensions",
     "skills",
     "prompts",
-    "pi-resources",
     "compound-engineering-pi",
     "compound-plugin",
     "README.md",
@@ -59,13 +56,9 @@
     "prepublishOnly": "bun test"
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "@sinclair/typebox": "*"
+    "@mariozechner/pi-coding-agent": "*"
   },
   "pi": {
-    "extensions": [
-      "./extensions"
-    ],
     "skills": [
       "./skills"
     ],
