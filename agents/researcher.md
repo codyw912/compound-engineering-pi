@@ -2,7 +2,7 @@
 name: researcher
 description: External knowledge researcher. Use for finding best practices, framework docs, library APIs, and industry patterns.
 tools: read, grep, find, ls, web_search, fetch_content
-model: anthropic/claude-haiku-4-5
+model: opencode/gpt-5.4-mini
 thinking: medium
 ---
 

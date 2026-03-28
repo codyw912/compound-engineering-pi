@@ -2,7 +2,7 @@
 name: reviewer
 description: Multi-perspective code reviewer. Use for security, performance, architecture, and correctness review of code changes.
 tools: read, grep, find, ls, bash
-model: anthropic/claude-sonnet-4-20250514
+model: anthropic/claude-sonnet-4-6
 thinking: high
 ---
 

@@ -2,7 +2,7 @@
 name: explorer
 description: Fast read-only codebase scout. Use for finding files, locating patterns, mapping structure, and answering "where is X?" questions.
 tools: read, grep, find, ls, fetch_content, web_search
-model: anthropic/claude-haiku-4-5
+model: opencode/gemini-3-flash
 thinking: low
 ---
 

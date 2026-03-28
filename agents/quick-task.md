@@ -2,7 +2,7 @@
 name: quick-task
 description: Fast, low-reasoning agent for mechanical tasks. File creation, simple edits, data collection, formatting.
 tools: read, grep, find, ls, write, edit, bash
-model: anthropic/claude-haiku-4-5
+model: opencode/gemini-3-flash
 thinking: low
 ---
 
