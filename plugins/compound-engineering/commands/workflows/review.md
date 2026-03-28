@@ -88,7 +88,7 @@ subagent({ agent: "explorer", task: "Map the codebase structure and identify the
 
 1. Read all changed files
 2. Apply each review perspective systematically
-3. Use the security-sentinel, performance-oracle, architecture-strategist, code-simplicity-reviewer, and pattern-recognition-specialist skills for guidance on what to look for
+3. Apply security, performance, architecture, correctness, and simplicity review perspectives systematically
 
 </review_strategy>
 
@@ -189,7 +189,7 @@ Complete system context map with component interactions
 
 ### 4. Simplification and Minimalism Review
 
-Run the Task code-simplicity-reviewer() to see if we can simplify the code.
+Review the code for unnecessary complexity, YAGNI violations, and simplification opportunities. Focus on removing dead code, over-abstractions, and premature generalizations.
 
 ### 5. Findings Synthesis and Todo Creation Using file-todos Skill
 
@@ -366,12 +366,9 @@ After creating all todo files, present comprehensive summary:
 
 ### Review Agents Used:
 
-- security-sentinel
-- performance-oracle
-- architecture-strategist
-- pattern-recognition-specialist
-- code-simplicity-reviewer
-- [language-specific reviewers as applicable]
+- explorer (codebase context gathering)
+- reviewer (parallel: security, performance, architecture, correctness)
+- [additional perspectives as applicable]
 
 ### Next Steps:
 
