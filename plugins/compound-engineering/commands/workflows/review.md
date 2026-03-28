@@ -59,38 +59,38 @@ The following paths are compound-engineering pipeline artifacts and must never b
 If a review agent flags any file in these directories for cleanup or removal, discard that finding during synthesis. Do not create a todo for it.
 </protected_artifacts>
 
-#### Parallel Agents to review the PR:
+#### Code Review Execution:
 
-<parallel_tasks>
+<review_strategy>
 
-Run ALL or most of these agents at the same time:
+**If the `subagent` tool is available**, use it for parallel review:
 
-1. Task git-history-analyzer(PR content)
-2. Task pattern-recognition-specialist(PR content)
-3. Task architecture-strategist(PR content)
-4. Task security-sentinel(PR content)
-5. Task performance-oracle(PR content)
-6. Task data-integrity-guardian(PR content)
-7. Task code-simplicity-reviewer(PR content)
+Use the `subagent` tool with parallel tasks to run the `reviewer` agent. Split the review into focused tasks:
 
-**Language-specific reviewers (run if PR contains matching files):**
+```
+subagent({
+  tasks: [
+    { agent: "reviewer", task: "Review for SECURITY issues only: input validation, injection, auth/authz, secrets, path traversal. Files changed: [list files]" },
+    { agent: "reviewer", task: "Review for PERFORMANCE issues only: algorithmic complexity, N+1 queries, memory allocation, missing caching. Files changed: [list files]" },
+    { agent: "reviewer", task: "Review for ARCHITECTURE and CORRECTNESS issues: module boundaries, pattern consistency, edge cases, error handling, type safety. Files changed: [list files]" },
+    { agent: "explorer", task: "Analyze git history for the changed files. What patterns exist? Have these areas been problematic before? Files: [list files]" }
+  ]
+})
+```
 
-8. If PR contains Python files: Task kieran-python-reviewer(PR content)
-9. If PR contains TypeScript/JavaScript files: Task kieran-typescript-reviewer(PR content)
+Also run the `explorer` agent first if you need to gather context about the codebase structure:
 
-</parallel_tasks>
+```
+subagent({ agent: "explorer", task: "Map the codebase structure and identify the modules affected by this PR. List key files, their responsibilities, and dependencies." })
+```
 
-#### Conditional Agents (Run if applicable):
+**If the `subagent` tool is NOT available**, perform the review sequentially in-context. Apply all review perspectives (security, performance, architecture, correctness, simplicity) yourself using the skills available:
 
-<conditional_agents>
+1. Read all changed files
+2. Apply each review perspective systematically
+3. Use the security-sentinel, performance-oracle, architecture-strategist, code-simplicity-reviewer, and pattern-recognition-specialist skills for guidance on what to look for
 
-These agents are run ONLY when the PR matches specific criteria. Check the PR files list to determine if they apply:
-
-**If PR contains database migrations or schema changes:**
-- Look for migration files (SQL, Alembic, Prisma, Drizzle, etc.)
-- Run Task data-integrity-guardian(PR content) with extra focus on migration safety
-
-</conditional_agents>
+</review_strategy>
 
 ### 4. Ultra-Thinking Deep Dive Phases
 

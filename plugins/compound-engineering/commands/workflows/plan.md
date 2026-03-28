@@ -72,13 +72,24 @@ Refine the idea through collaborative dialogue using the **AskUserQuestion tool*
 First, I need to understand the project's conventions, existing patterns, and any documented learnings. This is fast and local - it informs whether external research is needed.
 </thinking>
 
-Run these agents **in parallel** to gather local context:
+**If the `subagent` tool is available**, run research in parallel:
 
-- Task repo-research-analyst(feature_description)
-- Task learnings-researcher(feature_description)
+```
+subagent({
+  tasks: [
+    { agent: "explorer", task: "Investigate the codebase structure, conventions, and existing patterns relevant to: [feature_description]. Look for similar features, architectural patterns, and any CLAUDE.md or AGENTS.md guidance." },
+    { agent: "explorer", task: "Search docs/solutions/ for any past learnings, gotchas, or documented solutions relevant to: [feature_description]" }
+  ]
+})
+```
+
+**If subagents are NOT available**, do the research yourself:
+- Scan the codebase for existing patterns and conventions
+- Check `docs/solutions/` for relevant past learnings
+- Review any CLAUDE.md or AGENTS.md guidance
 
 **What to look for:**
-- **Repo research:** existing patterns, CLAUDE.md guidance, technology familiarity, pattern consistency
+- **Repo research:** existing patterns, project guidance, technology familiarity, pattern consistency
 - **Learnings:** documented solutions in `docs/solutions/` that might apply (gotchas, patterns, lessons learned)
 
 These findings inform the next step.
@@ -103,10 +114,18 @@ Examples:
 
 **Only run if Step 1.5 indicates external research is valuable.**
 
-Run these agents in parallel:
+**If the `subagent` tool is available:**
 
-- Task best-practices-researcher(feature_description)
-- Task framework-docs-researcher(feature_description)
+```
+subagent({
+  tasks: [
+    { agent: "researcher", task: "Research best practices, community conventions, and industry patterns for: [feature_description]" },
+    { agent: "researcher", task: "Find official framework/library documentation relevant to: [feature_description]. Focus on APIs, version constraints, and known gotchas." }
+  ]
+})
+```
+
+**If subagents are NOT available**, research best practices and framework docs yourself using web_search and fetch_content.
 
 ### 1.6. Consolidate Research
 
@@ -148,9 +167,15 @@ Think like a product manager - what would make this issue clear and actionable? 
 
 ### 3. SpecFlow Analysis
 
-After planning the issue structure, run SpecFlow Analyzer to validate and refine the feature specification:
+After planning the issue structure, validate the specification for completeness:
 
-- Task spec-flow-analyzer(feature_description, research_findings)
+**If the `subagent` tool is available:**
+
+```
+subagent({ agent: "planner", task: "Analyze this feature specification for completeness, gaps, edge cases, and risks: [feature_description + research_findings]" })
+```
+
+**If subagents are NOT available**, use the spec-flow-analyzer skill to validate the specification yourself.
 
 **SpecFlow Analyzer Output:**
 
