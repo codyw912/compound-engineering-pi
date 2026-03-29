@@ -254,9 +254,51 @@ reviewer → "Review the auth middleware for security issues"
 | `planner` | Spec analysis, gap detection (for sub-planning within phases) |
 | `quick-task` | Mechanical edits, file creation, simple fixes |
 
-## Open Questions
+## Continuation Model
 
-- **Notepad granularity**: One set of notepad files per project, or per phase? Per-project is simpler but gets noisy on long projects. Per-phase means learnings don't automatically carry forward.
-- **state.json vs status.md**: Do we need both? state.json is machine-readable (progress counts, session log), status.md is LLM-readable (natural language summary). They serve different consumers.
-- **Plan format**: Should phase plans use the existing CE plan format, or a simpler task-list format optimized for the project-lead to parse and track?
-- **Scope of auto-continue**: Should project-lead auto-continue across all tasks in a sprint, or pause for human check-in after each wave? Configurable?
+Auto-continue is **per-task, driven by what verification requires** — not a blanket policy.
+
+### Verification Modes (declared per task in phase plans)
+
+```markdown
+- [ ] Implement Go parser
+  verify: auto (cargo test)
+
+- [ ] Add authentication middleware
+  verify: pause (security-sensitive, review before continuing)
+
+- [ ] Deploy to staging
+  verify: human (requires manual deploy + smoke test)
+```
+
+**`auto`** — Deterministic, machine-readable verification. If it passes, continue immediately.
+- Compiler checks: `cargo check`, `tsc --noEmit`, `go build`
+- Test suites: `cargo test`, `pytest`, `bun test`
+- Linters: `clippy`, `ruff`, `eslint`
+- Agent review findings (project-lead triages without human)
+
+**`pause`** — Stop after verification, report status, wait for human acknowledgment before continuing.
+- Security-sensitive changes
+- Architectural decisions that need confirmation
+- Changes with non-obvious side effects
+
+**`human`** — Cannot be verified by agents. Requires human action.
+- Deploy to staging/prod
+- Manual browser/app testing
+- Design/UX review
+- External API integration with side effects
+
+### Project-lead behavior
+
+If current task passes and next task is `auto` → continue immediately.
+If current task passes and next task is `pause` or `human` → stop, report status, wait.
+If current task fails → retry up to 2x, then stop and report the failure.
+
+Default when no verify mode is declared: `auto` for tasks with a clear test/build command, `pause` otherwise.
+
+## Design Decisions
+
+- **Notepad granularity**: Per-project with phase tags in entries. Learnings from phase 1 visible in phase 5 without copying. Grep by phase tag if needed.
+- **state.json + status.md**: Both kept. state.json for machine-readable progress. status.md for LLM-readable session bootstrap. Different consumers.
+- **Plan format**: Phase plans are simpler than full CE plans — task lists with parallelization annotations and verification tiers. Full CE brainstorm→plan cycle used when project-lead judges a task complex enough.
+- **Auto-continue**: Per-task based on verification mode. See Continuation Model above.
