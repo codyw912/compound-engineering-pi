@@ -23,24 +23,22 @@ Group TODOs by dependency order:
 
 ### 3. Implement (PARALLEL)
 
-**If the `subagent` tool is available**, use `quick-task` agents for parallel execution:
+**If the `subagent` tool is available**, choose the right agent per todo:
+
+- **P3 / simple mechanical fixes** (rename, delete dead code, add a flag, fix a typo) → `quick-task`
+- **P1-P2 / complex fixes** (logic changes, security fixes, refactors, new functionality) → `worker`
 
 ```
 subagent({
   tasks: [
-    { agent: "quick-task", task: "Fix TODO 001: [description]. File: [path]. Change: [specific fix]" },
-    { agent: "quick-task", task: "Fix TODO 002: [description]. File: [path]. Change: [specific fix]" },
-    { agent: "quick-task", task: "Fix TODO 003: [description]. File: [path]. Change: [specific fix]" }
+    { agent: "worker", task: "Fix TODO 001 (P1): [description]. File: [path]. Root cause: [analysis]. Expected fix: [approach]" },
+    { agent: "worker", task: "Fix TODO 002 (P2): [description]. File: [path]. Context: [details]" },
+    { agent: "quick-task", task: "Fix TODO 003 (P3): [description]. File: [path]. Change: [exact edit]" }
   ]
 })
 ```
 
-For complex fixes that require reasoning about architecture or correctness, use the `reviewer` agent to analyze first, then `quick-task` to implement:
-
-```
-subagent({ agent: "reviewer", task: "Analyze TODO 005 and recommend the exact fix: [description]" })
-# Then implement with quick-task based on the recommendation
-```
+Group by dependency phase — structural changes first, then consumers.
 
 **If subagents are NOT available**, implement the fixes yourself sequentially.
 

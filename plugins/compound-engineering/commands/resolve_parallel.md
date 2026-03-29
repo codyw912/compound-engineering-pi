@@ -22,13 +22,13 @@ Group by dependency order:
 
 ### 3. Implement (PARALLEL)
 
-**If the `subagent` tool is available**, use `quick-task` agents:
+**If the `subagent` tool is available**, use `worker` for complex fixes and `quick-task` for simple ones:
 
 ```
 subagent({
   tasks: [
-    { agent: "quick-task", task: "Fix TODO in [file:line]: [description]. [specific instructions]" },
-    { agent: "quick-task", task: "Fix TODO in [file:line]: [description]. [specific instructions]" }
+    { agent: "worker", task: "Fix TODO in [file:line]: [description]. [context and approach]" },
+    { agent: "quick-task", task: "Fix TODO in [file:line]: [description]. [exact edit]" }
   ]
 })
 ```
