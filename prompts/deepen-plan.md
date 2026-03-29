@@ -1,4 +1,5 @@
 ---
+name: deepen-plan
 description: Enhance a plan with parallel research agents for each section to add depth, best practices, and implementation details
 argument-hint: "[path to plan file]"
 ---
@@ -9,7 +10,7 @@ argument-hint: "[path to plan file]"
 
 **Note: The current year is 2026.** Use this when searching for recent documentation and best practices.
 
-This command takes an existing plan (from `/workflows-plan`) and enhances each section with parallel research agents. Each major element gets its own dedicated research sub-agent to find:
+This command takes an existing plan (from `/workflows:plan`) and enhances each section with parallel research agents. Each major element gets its own dedicated research sub-agent to find:
 - Best practices and industry patterns
 - Performance optimizations
 - UI/UX improvements (if applicable)
@@ -85,7 +86,7 @@ cat ~/.claude/plugins/installed_plugins.json
 
 ```bash
 # For each skill directory found, read its documentation
-cat [skill-path]/skill.md
+cat [skill-path]/SKILL.md
 ```
 
 **Step 3: Match skills to plan content**
@@ -95,62 +96,35 @@ For each skill discovered:
 - Check if any plan sections match the skill's domain
 - If there's a match, spawn a sub-agent to apply that skill's knowledge
 
-**Step 4: Spawn a sub-agent for EVERY matched skill**
+**Step 4: Apply matched skills to the plan**
 
-**CRITICAL: For EACH skill that matches, spawn a separate sub-agent and instruct it to USE that skill.**
+For each matched skill, use a subagent to research and apply that skill's domain knowledge to the plan.
 
-For each matched skill:
+**If the `subagent` tool is available**, spawn parallel researchers:
+
 ```
-Task general-purpose: "You have the [skill-name] skill available at [skill-path].
-
-YOUR JOB: Use this skill on the plan.
-
-1. Read the skill: cat [skill-path]/skill.md
-2. Follow the skill's instructions exactly
-3. Apply the skill to this content:
-
-[relevant plan section or full plan]
-
-4. Return the skill's full output
-
-The skill tells you what to do - follow it. Execute the skill completely."
+subagent({
+  tasks: [
+    { agent: "researcher", task: "Read the skill at [skill-path]/SKILL.md. Apply its domain knowledge to deepen this section of the plan: [relevant section]. Return specific recommendations, patterns, and improvements." },
+    { agent: "researcher", task: "Read the skill at [skill-path]/SKILL.md. Apply its domain knowledge to: [relevant section]." }
+  ]
+})
 ```
 
-**Spawn ALL skill sub-agents in PARALLEL:**
-- 1 sub-agent per matched skill
-- Each sub-agent reads and uses its assigned skill
-- All run simultaneously
-- 10, 20, 30 skill sub-agents is fine
+Spawn one researcher per matched skill, all in parallel.
 
-**Each sub-agent:**
-1. Reads its skill's SKILL.md
-2. Follows the skill's workflow/instructions
-3. Applies the skill to the plan
-4. Returns whatever the skill produces (code, recommendations, patterns, reviews, etc.)
-
-**Example spawns:**
-```
-Task general-purpose: "Use the dhh-rails-style skill at ~/.claude/plugins/.../dhh-rails-style. Read SKILL.md and apply it to: [Rails sections of plan]"
-
-Task general-purpose: "Use the frontend-design skill at ~/.claude/plugins/.../frontend-design. Read SKILL.md and apply it to: [UI sections of plan]"
-
-Task general-purpose: "Use the agent-native-architecture skill at ~/.claude/plugins/.../agent-native-architecture. Read SKILL.md and apply it to: [agent/tool sections of plan]"
-
-Task general-purpose: "Use the security-patterns skill at ~/.claude/skills/security-patterns. Read SKILL.md and apply it to: [full plan]"
-```
-
-**No limit on skill sub-agents. Spawn one for every skill that could possibly be relevant.**
+**If subagents are NOT available**, read each matched skill yourself and apply its guidance to the plan sections.
 
 ### 3. Discover and Apply Learnings/Solutions
 
 <thinking>
-Check for documented learnings from /workflows-compound. These are solved problems stored as markdown files. Spawn a sub-agent for each learning to check if it's relevant.
+Check for documented learnings from /workflows:compound. These are solved problems stored as markdown files. Spawn a sub-agent for each learning to check if it's relevant.
 </thinking>
 
 **LEARNINGS LOCATION - Check these exact folders:**
 
 ```
-docs/solutions/           <-- PRIMARY: Project-level learnings (created by /workflows-compound)
+docs/solutions/           <-- PRIMARY: Project-level learnings (created by /workflows:compound)
 ├── performance-issues/
 │   └── *.md
 ├── debugging-patterns/
@@ -218,24 +192,23 @@ Compare each learning's frontmatter against the plan:
 - Same category as plan domain
 - Similar patterns or concerns
 
-**Step 4: Spawn sub-agents for filtered learnings**
+**Step 4: Check filtered learnings against the plan**
 
-For each learning that passes the filter:
+For each learning that passes the filter, check if it applies to the plan.
+
+**If the `subagent` tool is available:**
 
 ```
-Task general-purpose: "
-LEARNING FILE: [full path to .md file]
+subagent({
+  tasks: [
+    { agent: "explorer", task: "Read [learning-file-path]. Check if this documented solution applies to the plan below. If relevant, explain how and quote the key insight.\n\nPlan:\n[plan content]" }
+  ]
+})
+```
 
-1. Read this learning file completely
-2. This learning documents a previously solved problem
+**If subagents are NOT available**, read each learning file yourself and check relevance.
 
-Check if this learning applies to this plan:
-
----
-[full plan content]
----
-
-If relevant:
+For each relevant learning:
 - Explain specifically how it applies
 - Quote the key insight or solution
 - Suggest where/how to incorporate it
@@ -369,7 +342,7 @@ Wait for ALL parallel agents to complete - skills, research agents, review agent
 **Collect outputs from ALL sources:**
 
 1. **Skill-based sub-agents** - Each skill's full output (code examples, patterns, recommendations)
-2. **Learnings/Solutions sub-agents** - Relevant documented learnings from /workflows-compound
+2. **Learnings/Solutions sub-agents** - Relevant documented learnings from /workflows:compound
 3. **Research agents** - Best practices, documentation, real-world examples
 4. **Review agents** - All feedback from every reviewer (architecture, security, performance, simplicity, etc.)
 5. **Context7 queries** - Framework documentation and patterns
@@ -473,36 +446,36 @@ Before finalizing:
 
 ## Post-Enhancement Options
 
-After writing the enhanced plan, use the **ask_user_question tool** to present these options:
+After writing the enhanced plan, use the **AskUserQuestion tool** to present these options:
 
 **Question:** "Plan deepened at `[plan_path]`. What would you like to do next?"
 
 **Options:**
 1. **View diff** - Show what was added/changed
 2. **Use `/technical_review`** - Get feedback from reviewers on enhanced plan
-3. **Use `/workflows-work`** - Begin implementing this enhanced plan
+3. **Use `/workflows:work`** - Begin implementing this enhanced plan
 4. **Deepen further** - Run another round of research on specific sections
 5. **Revert** - Restore original plan (if backup exists)
 
 Based on selection:
 - **View diff** → Run `git diff [plan_path]` or show before/after
 - **`/technical_review`** → Run `pi --no-session -p "/technical_review [plan_path]"`
-- **`/workflows-work`** → Run `pi --no-session -p "/workflows-work [plan_path]"`
+- **`/workflows:work`** → Run `pi --no-session -p "/workflows:work [plan_path]"`
 - **Deepen further** → Ask which sections need more research, then re-run those agents
 - **Revert** → Restore from git or backup
 
-**Important:** Slash commands (like `/workflows-work`) are Pi prompt templates, not shell executables. Never run `/...` directly via bash.
+**Important:** Slash commands (like `/workflows:work`) are prompt templates, not shell executables. Never run `/...` directly via bash.
 
 ## Example Enhancement
 
-**Before (from /workflows-plan):**
+**Before (from /workflows:plan):**
 ```markdown
 ## Technical Approach
 
 Use React Query for data fetching with optimistic updates.
 ```
 
-**After (from /workflows-deepen-plan):**
+**After (from /workflows:deepen-plan):**
 ```markdown
 ## Technical Approach
 
@@ -545,7 +518,3 @@ const queryClient = new QueryClient({
 ```
 
 NEVER CODE! Just research and enhance the plan.
-## Pi + MCPorter note
-For MCP access in Pi, use MCPorter via the generated tools:
-- `mcporter_list` to inspect available MCP tools
-- `mcporter_call` to invoke a tool

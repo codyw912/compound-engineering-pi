@@ -96,51 +96,24 @@ For each skill discovered:
 - Check if any plan sections match the skill's domain
 - If there's a match, spawn a sub-agent to apply that skill's knowledge
 
-**Step 4: Spawn a sub-agent for EVERY matched skill**
+**Step 4: Apply matched skills to the plan**
 
-**CRITICAL: For EACH skill that matches, spawn a separate sub-agent and instruct it to USE that skill.**
+For each matched skill, use a subagent to research and apply that skill's domain knowledge to the plan.
 
-For each matched skill:
+**If the `subagent` tool is available**, spawn parallel researchers:
+
 ```
-Task general-purpose: "You have the [skill-name] skill available at [skill-path].
-
-YOUR JOB: Use this skill on the plan.
-
-1. Read the skill: cat [skill-path]/SKILL.md
-2. Follow the skill's instructions exactly
-3. Apply the skill to this content:
-
-[relevant plan section or full plan]
-
-4. Return the skill's full output
-
-The skill tells you what to do - follow it. Execute the skill completely."
+subagent({
+  tasks: [
+    { agent: "researcher", task: "Read the skill at [skill-path]/SKILL.md. Apply its domain knowledge to deepen this section of the plan: [relevant section]. Return specific recommendations, patterns, and improvements." },
+    { agent: "researcher", task: "Read the skill at [skill-path]/SKILL.md. Apply its domain knowledge to: [relevant section]." }
+  ]
+})
 ```
 
-**Spawn ALL skill sub-agents in PARALLEL:**
-- 1 sub-agent per matched skill
-- Each sub-agent reads and uses its assigned skill
-- All run simultaneously
-- 10, 20, 30 skill sub-agents is fine
+Spawn one researcher per matched skill, all in parallel.
 
-**Each sub-agent:**
-1. Reads its skill's SKILL.md
-2. Follows the skill's workflow/instructions
-3. Applies the skill to the plan
-4. Returns whatever the skill produces (code, recommendations, patterns, reviews, etc.)
-
-**Example spawns:**
-```
-Task general-purpose: "Use the dhh-rails-style skill at ~/.claude/plugins/.../dhh-rails-style. Read SKILL.md and apply it to: [Rails sections of plan]"
-
-Task general-purpose: "Use the frontend-design skill at ~/.claude/plugins/.../frontend-design. Read SKILL.md and apply it to: [UI sections of plan]"
-
-Task general-purpose: "Use the agent-native-architecture skill at ~/.claude/plugins/.../agent-native-architecture. Read SKILL.md and apply it to: [agent/tool sections of plan]"
-
-Task general-purpose: "Use the security-patterns skill at ~/.claude/skills/security-patterns. Read SKILL.md and apply it to: [full plan]"
-```
-
-**No limit on skill sub-agents. Spawn one for every skill that could possibly be relevant.**
+**If subagents are NOT available**, read each matched skill yourself and apply its guidance to the plan sections.
 
 ### 3. Discover and Apply Learnings/Solutions
 
@@ -219,24 +192,23 @@ Compare each learning's frontmatter against the plan:
 - Same category as plan domain
 - Similar patterns or concerns
 
-**Step 4: Spawn sub-agents for filtered learnings**
+**Step 4: Check filtered learnings against the plan**
 
-For each learning that passes the filter:
+For each learning that passes the filter, check if it applies to the plan.
+
+**If the `subagent` tool is available:**
 
 ```
-Task general-purpose: "
-LEARNING FILE: [full path to .md file]
+subagent({
+  tasks: [
+    { agent: "explorer", task: "Read [learning-file-path]. Check if this documented solution applies to the plan below. If relevant, explain how and quote the key insight.\n\nPlan:\n[plan content]" }
+  ]
+})
+```
 
-1. Read this learning file completely
-2. This learning documents a previously solved problem
+**If subagents are NOT available**, read each learning file yourself and check relevance.
 
-Check if this learning applies to this plan:
-
----
-[full plan content]
----
-
-If relevant:
+For each relevant learning:
 - Explain specifically how it applies
 - Quote the key insight or solution
 - Suggest where/how to incorporate it

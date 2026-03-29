@@ -1,4 +1,5 @@
 ---
+name: workflows:work
 description: Execute work plans efficiently while maintaining quality and finishing features
 argument-hint: "[plan file, specification, or todo file path]"
 ---
@@ -72,7 +73,7 @@ This command takes a work document (plan, specification, or todo file) and execu
    - You plan to switch between branches frequently
 
 3. **Create Todo List**
-   - Use file-based todos (todos/ + /skill:file-todos) to break plan into actionable tasks
+   - Use TodoWrite to break plan into actionable tasks
    - Include dependencies between tasks
    - Prioritize based on what needs to be done first
    - Include testing and quality check tasks
@@ -86,13 +87,13 @@ This command takes a work document (plan, specification, or todo file) and execu
 
    ```
    while (tasks remain):
-     - Mark task as in_progress in file-based todos (todos/ + /skill:file-todos)
+     - Mark task as in_progress in TodoWrite
      - Read any referenced files from the plan
      - Look for similar patterns in codebase
      - Implement following existing conventions
      - Write tests for new functionality
      - Run tests after changes
-     - Mark task as completed in file-based todos (todos/ + /skill:file-todos)
+     - Mark task as completed in TodoWrite
      - Mark off the corresponding checkbox in the plan file ([ ] → [x])
      - Evaluate for incremental commit (see below)
    ```
@@ -153,7 +154,7 @@ This command takes a work document (plan, specification, or todo file) and execu
    - Repeat until implementation matches design
 
 6. **Track Progress**
-   - Keep file-based todos (todos/ + /skill:file-todos) updated as you complete tasks
+   - Keep TodoWrite updated as you complete tasks
    - Note any blockers or unexpected discoveries
    - Create new tasks if scope expands
    - Keep user informed of major milestones
@@ -177,22 +178,24 @@ This command takes a work document (plan, specification, or todo file) and execu
    Use for complex, risky, or large changes:
 
    - **code-simplicity-reviewer**: Check for unnecessary complexity
-   - **kieran-rails-reviewer**: Verify Rails conventions (Rails projects)
    - **performance-oracle**: Check for performance issues
    - **security-sentinel**: Scan for security vulnerabilities
-   - **cora-test-reviewer**: Review test quality (Rails projects with comprehensive test coverage)
-
-   Run reviewers in parallel with Task tool:
+   Run a quick review using subagents if available:
 
    ```
-   Task(code-simplicity-reviewer): "Review changes for simplicity"
-   Task(kieran-rails-reviewer): "Check Rails conventions"
+   subagent({
+     tasks: [
+       { agent: "reviewer", task: "Quick review of recent changes for simplicity and performance issues" }
+     ]
+   })
    ```
+
+   If subagents are not available, do a quick self-review for obvious issues.
 
    Present findings to user and address critical issues.
 
 3. **Final Validation**
-   - All file-based todos (todos/ + /skill:file-todos) tasks marked completed
+   - All TodoWrite tasks marked completed
    - All tests pass
    - Linting passes
    - Code follows existing patterns
@@ -399,7 +402,7 @@ See the `orchestrating-swarms` skill for detailed swarm patterns and best practi
 Before creating PR, verify:
 
 - [ ] All clarifying questions asked and answered
-- [ ] All file-based todos (todos/ + /skill:file-todos) tasks marked completed
+- [ ] All TodoWrite tasks marked completed
 - [ ] Tests pass (run project's test command)
 - [ ] Linting passes (use linting-agent)
 - [ ] Code follows existing patterns
@@ -427,6 +430,6 @@ For most features: tests + linting + following patterns is sufficient.
 - **Skipping clarifying questions** - Ask now, not after building wrong thing
 - **Ignoring plan references** - The plan has links for a reason
 - **Testing at the end** - Test continuously or suffer later
-- **Forgetting file-based todos (todos/ + /skill:file-todos)** - Track progress or lose track of what's done
+- **Forgetting TodoWrite** - Track progress or lose track of what's done
 - **80% done syndrome** - Finish the feature, don't move on early
 - **Over-reviewing simple changes** - Save reviewer agents for complex work

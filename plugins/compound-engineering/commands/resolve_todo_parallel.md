@@ -1,37 +1,58 @@
 ---
 name: resolve_todo_parallel
-description: Resolve all pending CLI todos using parallel processing
+description: Resolve all pending todos using parallel processing
 argument-hint: "[optional: specific todo ID or pattern]"
 ---
 
-Resolve all TODO comments using parallel processing.
+Resolve all pending TODO items from the todos/ directory using parallel processing.
 
 ## Workflow
 
 ### 1. Analyze
 
-Get all unresolved TODOs from the /todos/\*.md directory
+Read all unresolved TODOs from `todos/*-pending-*.md` and `todos/*-ready-*.md`.
 
 If any todo recommends deleting, removing, or gitignoring files in `docs/plans/` or `docs/solutions/`, skip it and mark it as `wont_fix`. These are compound-engineering pipeline artifacts that are intentional and permanent.
 
 ### 2. Plan
 
-Create a TodoWrite list of all unresolved items grouped by type.Make sure to look at dependencies that might occur and prioritize the ones needed by others. For example, if you need to change a name, you must wait to do the others. Output a mermaid flow diagram showing how we can do this. Can we do everything in parallel? Do we need to do one first that leads to others in parallel? I'll put the to-dos in the mermaid diagram flow‑wise so the agent knows how to proceed in order.
+Group TODOs by dependency order:
+- Identify items that must be done before others (e.g., structural changes before consumers)
+- Group independent items that can be done in parallel
+- Output a brief execution plan showing the phases
 
 ### 3. Implement (PARALLEL)
 
-Spawn a pr-comment-resolver agent for each unresolved item in parallel.
+**If the `subagent` tool is available**, use `quick-task` agents for parallel execution:
 
-So if there are 3 comments, it will spawn 3 pr-comment-resolver agents in parallel. liek this
+```
+subagent({
+  tasks: [
+    { agent: "quick-task", task: "Fix TODO 001: [description]. File: [path]. Change: [specific fix]" },
+    { agent: "quick-task", task: "Fix TODO 002: [description]. File: [path]. Change: [specific fix]" },
+    { agent: "quick-task", task: "Fix TODO 003: [description]. File: [path]. Change: [specific fix]" }
+  ]
+})
+```
 
-1. Task pr-comment-resolver(comment1)
-2. Task pr-comment-resolver(comment2)
-3. Task pr-comment-resolver(comment3)
+For complex fixes that require reasoning about architecture or correctness, use the `reviewer` agent to analyze first, then `quick-task` to implement:
 
-Always run all in parallel subagents/Tasks for each Todo item.
+```
+subagent({ agent: "reviewer", task: "Analyze TODO 005 and recommend the exact fix: [description]" })
+# Then implement with quick-task based on the recommendation
+```
 
-### 4. Commit & Resolve
+**If subagents are NOT available**, implement the fixes yourself sequentially.
 
-- Commit changes
-- Remove the TODO from the file, and mark it as resolved.
-- Push to remote
+### 4. Verify
+
+After all fixes are applied:
+- Run tests (detect from project: `cargo test`, `npm test`, `pytest`, etc.)
+- Run linting if configured
+- Verify no regressions
+
+### 5. Commit & Resolve
+
+- Commit changes with a descriptive message
+- Rename resolved todo files: `pending` → `complete`
+- Push to remote if configured

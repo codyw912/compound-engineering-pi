@@ -1,4 +1,5 @@
 ---
+name: workflows:review
 description: Perform exhaustive code reviews using multi-agent analysis, ultra-thinking, and worktrees
 argument-hint: "[PR number, GitHub URL, branch name, or latest]"
 ---
@@ -52,57 +53,44 @@ Ensure that the code is ready for analysis (either in worktree or on current bra
 <protected_artifacts>
 The following paths are compound-engineering pipeline artifacts and must never be flagged for deletion, removal, or gitignore by any review agent:
 
-- `docs/plans/*.md` — Plan files created by `/workflows-plan`. These are living documents that track implementation progress (checkboxes are checked off by `/workflows-work`).
+- `docs/plans/*.md` — Plan files created by `/workflows:plan`. These are living documents that track implementation progress (checkboxes are checked off by `/workflows:work`).
 - `docs/solutions/*.md` — Solution documents created during the pipeline.
 
 If a review agent flags any file in these directories for cleanup or removal, discard that finding during synthesis. Do not create a todo for it.
 </protected_artifacts>
 
-#### Parallel Agents to review the PR:
+#### Code Review Execution:
 
-<parallel_tasks>
+<review_strategy>
 
-Run ALL or most of these agents at the same time:
+**If the `subagent` tool is available**, use it for parallel review:
 
-1. Task kieran-rails-reviewer(PR content)
-2. Task dhh-rails-reviewer(PR title)
-3. If turbo is used: Task rails-turbo-expert(PR content)
-4. Task git-history-analyzer(PR content)
-5. Task dependency-detective(PR content)
-6. Task pattern-recognition-specialist(PR content)
-7. Task architecture-strategist(PR content)
-8. Task code-philosopher(PR content)
-9. Task security-sentinel(PR content)
-10. Task performance-oracle(PR content)
-11. Task devops-harmony-analyst(PR content)
-12. Task data-integrity-guardian(PR content)
-13. Task agent-native-reviewer(PR content) - Verify new features are agent-accessible
+Use the `subagent` tool with parallel tasks to run the `reviewer` agent. Split the review into focused tasks:
 
-</parallel_tasks>
+```
+subagent({
+  tasks: [
+    { agent: "reviewer", task: "Review for SECURITY issues only: input validation, injection, auth/authz, secrets, path traversal. Files changed: [list files]" },
+    { agent: "reviewer", task: "Review for PERFORMANCE issues only: algorithmic complexity, N+1 queries, memory allocation, missing caching. Files changed: [list files]" },
+    { agent: "reviewer", task: "Review for ARCHITECTURE and CORRECTNESS issues: module boundaries, pattern consistency, edge cases, error handling, type safety. Files changed: [list files]" },
+    { agent: "explorer", task: "Analyze git history for the changed files. What patterns exist? Have these areas been problematic before? Files: [list files]" }
+  ]
+})
+```
 
-#### Conditional Agents (Run if applicable):
+Also run the `explorer` agent first if you need to gather context about the codebase structure:
 
-<conditional_agents>
+```
+subagent({ agent: "explorer", task: "Map the codebase structure and identify the modules affected by this PR. List key files, their responsibilities, and dependencies." })
+```
 
-These agents are run ONLY when the PR matches specific criteria. Check the PR files list to determine if they apply:
+**If the `subagent` tool is NOT available**, perform the review sequentially in-context. Apply all review perspectives (security, performance, architecture, correctness, simplicity) yourself using the skills available:
 
-**If PR contains database migrations (db/migrate/*.rb files) or data backfills:**
+1. Read all changed files
+2. Apply each review perspective systematically
+3. Apply security, performance, architecture, correctness, and simplicity review perspectives systematically
 
-14. Task data-migration-expert(PR content) - Validates ID mappings match production, checks for swapped values, verifies rollback safety
-15. Task deployment-verification-agent(PR content) - Creates Go/No-Go deployment checklist with SQL verification queries
-
-**When to run migration agents:**
-- PR includes files matching `db/migrate/*.rb`
-- PR modifies columns that store IDs, enums, or mappings
-- PR includes data backfill scripts or rake tasks
-- PR changes how data is read/written (e.g., changing from FK to string column)
-- PR title/body mentions: migration, backfill, data transformation, ID mapping
-
-**What these agents check:**
-- `data-migration-expert`: Verifies hard-coded mappings match production reality (prevents swapped IDs), checks for orphaned associations, validates dual-write patterns
-- `deployment-verification-agent`: Produces executable pre/post-deploy checklists with SQL queries, rollback procedures, and monitoring plans
-
-</conditional_agents>
+</review_strategy>
 
 ### 4. Ultra-Thinking Deep Dive Phases
 
@@ -201,7 +189,7 @@ Complete system context map with component interactions
 
 ### 4. Simplification and Minimalism Review
 
-Run the Task code-simplicity-reviewer() to see if we can simplify the code.
+Review the code for unnecessary complexity, YAGNI violations, and simplification opportunities. Focus on removing dead code, over-abstractions, and premature generalizations.
 
 ### 5. Findings Synthesis and Todo Creation Using file-todos Skill
 
@@ -342,7 +330,7 @@ Examples:
 - `p2` - Important (should fix, architectural/performance)
 - `p3` - Nice-to-have (enhancements, cleanup)
 
-**Tagging:** Always add `code-review` tag, plus: `security`, `performance`, `architecture`, `rails`, `quality`, etc.
+**Tagging:** Always add `code-review` tag, plus: `security`, `performance`, `architecture`, `quality`, etc.
 
 #### Step 3: Summary Report
 
@@ -378,12 +366,9 @@ After creating all todo files, present comprehensive summary:
 
 ### Review Agents Used:
 
-- kieran-rails-reviewer
-- security-sentinel
-- performance-oracle
-- architecture-strategist
-- agent-native-reviewer
-- [other agents]
+- explorer (codebase context gathering)
+- reviewer (parallel: security, performance, architecture, correctness)
+- [additional perspectives as applicable]
 
 ### Next Steps:
 
@@ -436,94 +421,7 @@ After creating all todo files, present comprehensive summary:
 
 ```
 
-### 7. End-to-End Testing (Optional)
-
-<detect_project_type>
-
-**First, detect the project type from PR files:**
-
-| Indicator | Project Type |
-|-----------|--------------|
-| `*.xcodeproj`, `*.xcworkspace`, `Package.swift` (iOS) | iOS/macOS |
-| `Gemfile`, `package.json`, `app/views/*`, `*.html.*` | Web |
-| Both iOS files AND web files | Hybrid (test both) |
-
-</detect_project_type>
-
-<offer_testing>
-
-After presenting the Summary Report, offer appropriate testing based on project type:
-
-**For Web Projects:**
-```markdown
-**"Want to run browser tests on the affected pages?"**
-1. Yes - run `/test-browser`
-2. No - skip
-```
-
-**For iOS Projects:**
-```markdown
-**"Want to run Xcode simulator tests on the app?"**
-1. Yes - run `/xcode-test`
-2. No - skip
-```
-
-**For Hybrid Projects (e.g., Rails + Hotwire Native):**
-```markdown
-**"Want to run end-to-end tests?"**
-1. Web only - run `/test-browser`
-2. iOS only - run `/xcode-test`
-3. Both - run both commands
-4. No - skip
-```
-
-</offer_testing>
-
-#### If User Accepts Web Testing:
-
-Spawn a subagent to run browser tests (preserves main context):
-
-```
-Run subagent with agent="general-purpose" and task=""Invoke `/test-browser` as a Pi prompt for PR #[number]. Test all affected pages, check for console errors, handle failures by creating todos and fixing. Never run `/test-browser` directly via bash."".
-```
-
-The subagent will:
-1. Identify pages affected by the PR
-2. Navigate to each page and capture snapshots (using Playwright MCP or agent-browser CLI)
-3. Check for console errors
-4. Test critical interactions
-5. Pause for human verification on OAuth/email/payment flows
-6. Create P1 todos for any failures
-7. Fix and retry until all tests pass
-
-**Standalone:** `/test-browser [PR number]`
-
-#### If User Accepts iOS Testing:
-
-Spawn a subagent to run Xcode tests (preserves main context):
-
-```
-Run subagent with agent="general-purpose" and task=""Invoke `/xcode-test` as a Pi prompt for scheme [name]. Build for simulator, install, launch, take screenshots, check for crashes. Never run `/xcode-test` directly via bash."".
-```
-
-The subagent will:
-1. Verify XcodeBuildMCP is installed
-2. Discover project and schemes
-3. Build for iOS Simulator
-4. Install and launch app
-5. Take screenshots of key screens
-6. Capture console logs for errors
-7. Pause for human verification (Sign in with Apple, push, IAP)
-8. Create P1 todos for any failures
-9. Fix and retry until all tests pass
-
-**Standalone:** `/xcode-test [scheme]`
-
 ### Important: P1 Findings Block Merge
 
 Any **🔴 P1 (CRITICAL)** findings must be addressed before merging the PR. Present these prominently and ensure they're resolved before accepting the PR.
 ```
-## Pi + MCPorter note
-For MCP access in Pi, use MCPorter via the generated tools:
-- `mcporter_list` to inspect available MCP tools
-- `mcporter_call` to invoke a tool

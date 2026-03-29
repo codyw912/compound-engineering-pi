@@ -1,4 +1,5 @@
 ---
+name: workflows:brainstorm
 description: Explore requirements and approaches through collaborative dialogue before planning implementation
 argument-hint: "[feature idea or problem to explore]"
 ---
@@ -7,7 +8,7 @@ argument-hint: "[feature idea or problem to explore]"
 
 **Note: The current year is 2026.** Use this when dating brainstorm documents.
 
-Brainstorming helps answer **WHAT** to build through collaborative dialogue. It precedes `/workflows-plan`, which answers **HOW** to build it.
+Brainstorming helps answer **WHAT** to build through collaborative dialogue. It precedes `/workflows:plan`, which answers **HOW** to build it.
 
 **Process knowledge:** Load the `brainstorming` skill for detailed question techniques, approach exploration patterns, and YAGNI principles.
 
@@ -32,7 +33,7 @@ Evaluate whether brainstorming is needed based on the feature description.
 - Constrained, well-defined scope
 
 **If requirements are already clear:**
-Use **ask_user_question tool** to suggest: "Your requirements seem detailed enough to proceed directly to planning. Should I run `/workflows-plan` instead, or would you like to explore the idea further?"
+Use **AskUserQuestion tool** to suggest: "Your requirements seem detailed enough to proceed directly to planning. Should I run `/workflows:plan` instead, or would you like to explore the idea further?"
 
 ### Phase 1: Understand the Idea
 
@@ -40,13 +41,13 @@ Use **ask_user_question tool** to suggest: "Your requirements seem detailed enou
 
 Run a quick repo scan to understand existing patterns:
 
-- Run subagent with agent="repo-research-analyst" and task=""Understand existing patterns related to: <feature_description>"".
+- Task repo-research-analyst("Understand existing patterns related to: <feature_description>")
 
 Focus on: similar features, established patterns, CLAUDE.md guidance.
 
 #### 1.2 Collaborative Dialogue
 
-Use the **ask_user_question tool** to ask questions **one at a time**.
+Use the **AskUserQuestion tool** to ask questions **one at a time**.
 
 **Guidelines (see `brainstorming` skill for detailed techniques):**
 - Prefer multiple choice when natural options exist
@@ -67,7 +68,7 @@ For each approach, provide:
 
 Lead with your recommendation and explain why. Apply YAGNI—prefer simpler solutions.
 
-Use **ask_user_question tool** to ask which approach the user prefers.
+Use **AskUserQuestion tool** to ask which approach the user prefers.
 
 ### Phase 3: Capture the Design
 
@@ -79,13 +80,13 @@ Ensure `docs/brainstorms/` directory exists before writing.
 
 ### Phase 4: Handoff
 
-Use **ask_user_question tool** to present next steps:
+Use **AskUserQuestion tool** to present next steps:
 
 **Question:** "Brainstorm captured. What would you like to do next?"
 
 **Options:**
 1. **Review and refine** - Improve the document through structured self-review
-2. **Proceed to planning** - Invoke `/workflows-plan` as a Pi prompt (will auto-detect this brainstorm)
+2. **Proceed to planning** - Invoke `/workflows:plan` as a prompt (will auto-detect this brainstorm)
 3. **Done for now** - Return later
 
 **If user selects "Review and refine":**
@@ -94,8 +95,8 @@ Load the `document-review` skill and apply it to the brainstorm document.
 
 When document-review returns "Review complete", present next steps:
 
-1. **Move to planning** - Continue by invoking `/workflows-plan` with this document
-2. **Done for now** - Brainstorming complete. To start planning later, invoke `/workflows-plan [document-path]` as a Pi prompt
+1. **Move to planning** - Continue by invoking `/workflows:plan` with this document
+2. **Done for now** - Brainstorming complete. To start planning later, invoke `/workflows:plan [document-path]`
 
 ## Output Summary
 
@@ -110,7 +111,7 @@ Key decisions:
 - [Decision 1]
 - [Decision 2]
 
-Next: Invoke `/workflows-plan` as a Pi prompt when ready to implement.
+Next: Invoke `/workflows:plan` when ready to implement.
 ```
 
 ## Important Guidelines

@@ -1,4 +1,5 @@
 ---
+name: workflows:plan
 description: Transform feature descriptions into well-structured project plans following conventions
 argument-hint: "[feature description, bug report, or improvement idea]"
 ---
@@ -42,11 +43,11 @@ ls -la docs/brainstorms/*.md 2>/dev/null | head -10
 5. Use brainstorm decisions as input to the research phase
 
 **If multiple brainstorms could match:**
-Use **ask_user_question tool** to ask which brainstorm to use, or whether to proceed without one.
+Use **AskUserQuestion tool** to ask which brainstorm to use, or whether to proceed without one.
 
 **If no brainstorm found (or not relevant), run idea refinement:**
 
-Refine the idea through collaborative dialogue using the **ask_user_question tool**:
+Refine the idea through collaborative dialogue using the **AskUserQuestion tool**:
 
 - Ask questions one at a time to understand the idea fully
 - Prefer multiple choice questions when natural options exist
@@ -71,13 +72,24 @@ Refine the idea through collaborative dialogue using the **ask_user_question too
 First, I need to understand the project's conventions, existing patterns, and any documented learnings. This is fast and local - it informs whether external research is needed.
 </thinking>
 
-Run these agents **in parallel** to gather local context:
+**If the `subagent` tool is available**, run research in parallel:
 
-- Run subagent with agent="repo-research-analyst" and task="feature_description".
-- Run subagent with agent="learnings-researcher" and task="feature_description".
+```
+subagent({
+  tasks: [
+    { agent: "explorer", task: "Investigate the codebase structure, conventions, and existing patterns relevant to: [feature_description]. Look for similar features, architectural patterns, and any CLAUDE.md or AGENTS.md guidance." },
+    { agent: "explorer", task: "Search docs/solutions/ for any past learnings, gotchas, or documented solutions relevant to: [feature_description]" }
+  ]
+})
+```
+
+**If subagents are NOT available**, do the research yourself:
+- Scan the codebase for existing patterns and conventions
+- Check `docs/solutions/` for relevant past learnings
+- Review any CLAUDE.md or AGENTS.md guidance
 
 **What to look for:**
-- **Repo research:** existing patterns, CLAUDE.md guidance, technology familiarity, pattern consistency
+- **Repo research:** existing patterns, project guidance, technology familiarity, pattern consistency
 - **Learnings:** documented solutions in `docs/solutions/` that might apply (gotchas, patterns, lessons learned)
 
 These findings inform the next step.
@@ -102,10 +114,18 @@ Examples:
 
 **Only run if Step 1.5 indicates external research is valuable.**
 
-Run these agents in parallel:
+**If the `subagent` tool is available:**
 
-- Run subagent with agent="best-practices-researcher" and task="feature_description".
-- Run subagent with agent="framework-docs-researcher" and task="feature_description".
+```
+subagent({
+  tasks: [
+    { agent: "researcher", task: "Research best practices, community conventions, and industry patterns for: [feature_description]" },
+    { agent: "researcher", task: "Find official framework/library documentation relevant to: [feature_description]. Focus on APIs, version constraints, and known gotchas." }
+  ]
+})
+```
+
+**If subagents are NOT available**, research best practices and framework docs yourself using web_search and fetch_content.
 
 ### 1.6. Consolidate Research
 
@@ -147,9 +167,15 @@ Think like a product manager - what would make this issue clear and actionable? 
 
 ### 3. SpecFlow Analysis
 
-After planning the issue structure, run SpecFlow Analyzer to validate and refine the feature specification:
+After planning the issue structure, validate the specification for completeness:
 
-- Run subagent with agent="spec-flow-analyzer" and task="feature_description, research_findings".
+**If the `subagent` tool is available:**
+
+```
+subagent({ agent: "planner", task: "Analyze this feature specification for completeness, gaps, edge cases, and risks: [feature_description + research_findings]" })
+```
+
+**If subagents are NOT available**, use the spec-flow-analyzer skill to validate the specification yourself.
 
 **SpecFlow Analyzer Output:**
 
@@ -490,7 +516,7 @@ Examples:
 
 ## Post-Generation Options
 
-After writing the plan file, use the **ask_user_question tool** to present these options:
+After writing the plan file, use the **AskUserQuestion tool** to present these options:
 
 **Question:** "Plan ready at `docs/plans/YYYY-MM-DD-<type>-<name>-plan.md`. What would you like to do next?"
 
@@ -499,8 +525,8 @@ After writing the plan file, use the **ask_user_question tool** to present these
 2. **Use `/deepen-plan`** - Enhance each section with parallel research agents (best practices, performance, UI)
 3. **Use `/technical_review`** - Technical feedback from code-focused reviewers (DHH, Kieran, Simplicity)
 4. **Review and refine** - Improve the document through structured self-review
-5. **Use `/workflows-work`** - Begin implementing this plan locally
-6. **Use `/workflows-work` on remote** - Begin implementing in Claude Code on the web (use `&` to run in background)
+5. **Use `/workflows:work`** - Begin implementing this plan locally
+6. **Use `/workflows:work` on remote** - Begin implementing in Claude Code on the web (use `&` to run in background)
 7. **Create Issue** - Create issue in project tracker (GitHub/Linear)
 
 Based on selection:
@@ -508,16 +534,16 @@ Based on selection:
 - **`/deepen-plan`** → Run `pi --no-session -p "/deepen-plan docs/plans/<plan_filename>.md"` to enhance with research
 - **`/technical_review`** → Run `pi --no-session -p "/technical_review docs/plans/<plan_filename>.md"`
 - **Review and refine** → Load `document-review` skill.
-- **`/workflows-work`** → Run `pi --no-session -p "/workflows-work docs/plans/<plan_filename>.md"`
-- **`/workflows-work` on remote** → Run `pi --no-session -p "/workflows-work docs/plans/<plan_filename>.md" &` to start work in background
+- **`/workflows:work`** → Run `pi --no-session -p "/workflows:work docs/plans/<plan_filename>.md"`
+- **`/workflows:work` on remote** → Run `pi --no-session -p "/workflows:work docs/plans/<plan_filename>.md" &` to start work in background
 - **Create Issue** → See "Issue Creation" section below
 - **Other** (automatically provided) → Accept free text for rework or specific changes
 
-**Important:** Slash commands (like `/deepen-plan`) are Pi prompt templates, not shell executables. Never run `/...` directly via bash.
+**Important:** Slash commands (like `/deepen-plan`) are prompt templates, not shell executables. Never run `/...` directly via bash.
 
-**Note:** If running `/workflows-plan` with ultrathink enabled, automatically run `/deepen-plan` after plan creation by invoking `pi --no-session -p "/deepen-plan docs/plans/<plan_filename>.md"`.
+**Note:** If running `/workflows:plan` with ultrathink enabled, automatically run `/deepen-plan` after plan creation by invoking `pi --no-session -p "/deepen-plan docs/plans/<plan_filename>.md"`.
 
-Loop back to options after Simplify or Other changes until user selects `/workflows-work` or `/technical_review`.
+Loop back to options after Simplify or Other changes until user selects `/workflows:work` or `/technical_review`.
 
 ## Issue Creation
 
@@ -547,6 +573,6 @@ When user selects "Create Issue", detect their project tracker from CLAUDE.md:
 
 5. **After creation:**
    - Display the issue URL
-   - Ask if they want to proceed to `/workflows-work` or `/technical_review`
+   - Ask if they want to proceed to `/workflows:work` or `/technical_review`
 
 NEVER CODE! Just research and write the plan.
