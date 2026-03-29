@@ -1,24 +1,24 @@
 ---
-description: Initialize a new long-running project with the project-lead agent
-argument-hint: "[project description or goal]"
+description: Initialize project management for a new or existing project
+argument-hint: "[project goals or what you want to work on]"
 ---
 
-Start a new project by delegating to the project-lead agent.
+Set up the project-lead workflow for this project. Works on both greenfield and existing codebases.
 
 Use the `subagent` tool to launch the project-lead:
 
 ```
 subagent({
   agent: "project-lead",
-  task: "Initialize a new project. The user wants to build: $ARGUMENTS\n\nThis is a new project — no .project/ directory exists yet. Follow the Project Initialization workflow in your instructions: discuss goals with the user, then set up the .project/ structure with project.md, initial phase plan, status.md, state.json, and notepad files."
+  task: "Initialize project management for this codebase. The user's goals: $ARGUMENTS\n\nCheck if this is an existing codebase or greenfield, then follow the appropriate initialization path in your instructions. For existing codebases, launch explorers to understand the code before setting up .project/ state."
 })
 ```
 
-If the subagent tool is not available, follow the project-lead's initialization workflow directly:
+If the subagent tool is not available, follow the initialization workflow directly:
 
-1. Discuss the project goals, constraints, and scope
-2. Create `.project/` directory structure
-3. Write `project.md` with vision and goals
-4. Create initial phase breakdown in `.project/phases/`
-5. Initialize `status.md` and `state.json`
+1. Check if this is an existing project (source files, git history) or greenfield
+2. **If existing**: explore the codebase first — map architecture, tech stack, recent activity. Then discuss goals with the user.
+3. **If greenfield**: discuss goals, constraints, and scope with the user.
+4. Create `.project/` directory structure with project.md, phase plan, status.md, state.json, and notepad
+5. For existing projects, pre-populate notepad with conventions and patterns found during exploration
 6. Commit the initial project state

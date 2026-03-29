@@ -99,29 +99,70 @@ At session end:
 
 ## Project Initialization
 
-When starting a new project (no `.project/` exists):
+When no `.project/` exists, determine whether this is a **greenfield** or **existing codebase**:
 
-1. Discuss the project with the user — goals, constraints, scope, timeline
-2. Create the directory structure:
+- Check for source files, Cargo.toml, package.json, go.mod, pyproject.toml, etc.
+- Check git history: `git log --oneline -5`
+- If there's existing code → **Existing Project** path
+- If empty or just scaffolding → **Greenfield** path
+
+### Existing Project
+
+The codebase already exists. Your job is to understand it and set up project management around it.
+
+1. **Explore the codebase** — delegate to `explorer` agents in parallel:
+
+```
+subagent({
+  tasks: [
+    { agent: "explorer", task: "Map the overall architecture of this project. What are the main modules, their responsibilities, and how they connect? Look at directory structure, key files, entry points, and dependencies." },
+    { agent: "explorer", task: "Analyze the project's tech stack, build system, test setup, and development workflow. Check for: package manager, test framework, CI config, linting, documentation." },
+    { agent: "explorer", task: "Examine recent git history. What's been worked on? What are the active areas? Any patterns in commit messages or branch names? Check: git log --oneline -20, git branch -a" }
+  ]
+})
+```
+
+2. **Discuss with the user** — present exploration findings, then ask:
+   - What are your goals for this project going forward?
+   - What's the current state — stable? in-progress? needs refactoring?
+   - What are you planning to work on next?
+   - Any constraints, deadlines, or non-goals?
+
+3. **Create the `.project/` structure:**
 
 ```
 .project/
-├── project.md
-├── status.md
-├── state.json
+├── project.md              # Vision + goals from discussion
+├── status.md               # Current state based on exploration
+├── state.json              # Initialized with exploration data
 ├── notepad/
-│   ├── learnings.md
-│   ├── decisions.md
-│   ├── issues.md
-│   └── blockers.md
+│   ├── learnings.md        # Pre-populated with conventions found by explorers
+│   ├── decisions.md        # Existing architectural decisions (from code/docs)
+│   ├── issues.md           # Known issues or tech debt found
+│   └── blockers.md         # Empty or user-provided
 └── phases/
-    └── phase-1-[name].md
+    └── phase-1-[name].md   # First phase based on user's goals
 ```
 
-3. Write `project.md` with vision, goals, constraints, non-goals
-4. Write the initial phase plan with tasks, parallelization, and verification modes
-5. Initialize `state.json` and `status.md`
-6. Commit: `git add .project/ && git commit -m "project: initialize [name]"`
+4. **Pre-populate the notepad** from exploration findings:
+   - `learnings.md` — coding conventions, patterns, project structure
+   - `decisions.md` — tech stack choices, architectural patterns already in place
+   - `issues.md` — any tech debt, inconsistencies, or problems found during exploration
+
+5. **Write `project.md`** incorporating both exploration findings and user's stated goals
+6. **Create the initial phase plan** based on what the user wants to work on
+7. **Commit**: `git add .project/ && git commit -m "project: initialize [name] from existing codebase"`
+
+### Greenfield Project
+
+No existing code. You're starting from scratch.
+
+1. **Discuss the project** with the user — goals, constraints, scope, tech stack, timeline
+2. **Create the `.project/` structure** (same as above, but notepad starts mostly empty)
+3. **Write `project.md`** with vision, goals, constraints, non-goals
+4. **Write the initial phase plan** — phase 1 is typically scaffolding + core architecture
+5. **Initialize `state.json` and `status.md`**
+6. **Commit**: `git add .project/ && git commit -m "project: initialize [name]"`
 
 ## Phase Plans
 
