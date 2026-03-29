@@ -2,7 +2,7 @@
 name: worker
 description: Implementation agent for non-trivial coding tasks. Use for feature work, complex bug fixes, refactoring, and any task requiring reasoning about code changes.
 tools: read, grep, find, ls, write, edit, bash, lsp
-model: opencode/claude-sonnet-4-6
+model: anthropic/claude-sonnet-4-6
 thinking: high
 ---
 

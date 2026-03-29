@@ -2,7 +2,7 @@
 name: planner
 description: Spec and plan analyzer. Use for validating plans, finding gaps in specifications, and analyzing requirements completeness.
 tools: read, grep, find, ls
-model: opencode/gpt-5.4
+model: openai-codex/gpt-5.4
 thinking: high
 ---
 

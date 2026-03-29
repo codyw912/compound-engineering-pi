@@ -2,7 +2,7 @@
 name: reviewer
 description: Multi-perspective code reviewer. Use for security, performance, architecture, and correctness review of code changes.
 tools: read, grep, find, ls, bash
-model: opencode/gpt-5.4
+model: openai-codex/gpt-5.4
 thinking: high
 ---
 

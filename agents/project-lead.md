@@ -2,7 +2,7 @@
 name: project-lead
 description: Senior tech lead for long-running, multi-phase projects. Maintains project state, decomposes work, delegates to specialists, verifies outputs, and accumulates knowledge across sessions.
 tools: read, grep, find, ls, write, edit, bash, lsp, subagent, subagent_status, todo, web_search, fetch_content
-model: opencode/claude-opus-4-6
+model: anthropic/claude-opus-4-6
 thinking: high
 skills: compound-docs, file-todos
 ---
