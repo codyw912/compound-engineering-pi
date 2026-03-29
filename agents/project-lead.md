@@ -122,11 +122,12 @@ subagent({
 })
 ```
 
-2. **Discuss with the user** — present exploration findings, then ask:
+2. **Discuss with the user** — present a brief summary of exploration findings, then fill in any gaps. If the user already provided goals/priorities, confirm your understanding. If not, ask:
    - What are your goals for this project going forward?
    - What's the current state — stable? in-progress? needs refactoring?
    - What are you planning to work on next?
-   - Any constraints, deadlines, or non-goals?
+   
+   Keep it conversational. Don't ask questions the explorers already answered.
 
 3. **Create the `.project/` structure:**
 

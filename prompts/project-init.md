@@ -1,16 +1,16 @@
 ---
 description: Initialize project management for a new or existing project
-argument-hint: "[project goals or what you want to work on]"
+argument-hint: "[optional: goals, priorities, or focus areas]"
 ---
 
-Set up the project-lead workflow for this project. Works on both greenfield and existing codebases.
+Set up the project-lead workflow for this project. Works on both greenfield and existing codebases. For existing projects, explorers will map the codebase automatically — no description needed.
 
 Use the `subagent` tool to launch the project-lead:
 
 ```
 subagent({
   agent: "project-lead",
-  task: "Initialize project management for this codebase. The user's goals: $ARGUMENTS\n\nCheck if this is an existing codebase or greenfield, then follow the appropriate initialization path in your instructions. For existing codebases, launch explorers to understand the code before setting up .project/ state."
+  task: "Initialize project management for this codebase.\n\nCheck if this is an existing codebase or greenfield, then follow the appropriate initialization path in your instructions. For existing codebases, launch explorers to understand the code before setting up .project/ state.\n\nAdditional context from user (may be empty): $ARGUMENTS"
 })
 ```
 
