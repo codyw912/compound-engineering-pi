@@ -1,23 +1,21 @@
 ---
-description: Resume work on the current project with the project-lead agent
+description: Resume work on the current project
 argument-hint: "[optional: what to focus on this session]"
 ---
 
-Resume the current project by delegating to the project-lead agent.
+Resume the current project. Bootstrap context from the project state files.
 
-Use the `subagent` tool to launch the project-lead:
+Read these in order:
+1. `.project/project.md` — vision and goals
+2. `.project/status.md` — where we left off
+3. `.project/state.json` — progress counts
+4. The active phase plan from `.project/phases/`
+5. `.project/notepad/learnings.md` — accumulated knowledge
+6. `.project/notepad/issues.md` — known problems
+7. `.project/notepad/blockers.md` — anything blocking progress
 
-```
-subagent({
-  agent: "project-lead",
-  task: "Resume work on this project. Read .project/status.md and .project/state.json to understand where we left off, then bootstrap context from the active phase plan and notepad.\n\nUser wants to focus on: $ARGUMENTS\n\nIf the user didn't specify a focus, propose the next logical step based on the project state."
-})
-```
+Give a brief status report (3-5 lines), then either:
+- If the user specified a focus: propose how to approach it
+- If not: recommend the next logical step based on project state
 
-If the subagent tool is not available, bootstrap context manually:
-
-1. Read `.project/status.md` for current state
-2. Read `.project/state.json` for progress counts
-3. Read the active phase plan
-4. Read `.project/notepad/learnings.md` and `.project/notepad/issues.md`
-5. Give a brief status report and propose next steps
+User's focus for this session (may be empty): $ARGUMENTS
