@@ -1,0 +1,14 @@
+{
+  "$schema": "./agent-models.schema.json",
+  "description": "Model assignments for compound-engineering agents. Edit this file to swap models.",
+  "models": {
+    "orchestrator": "opencode/claude-opus-4-6",
+    "explorer": "opencode/gemini-3-flash",
+    "researcher": "opencode/gpt-5.4-mini",
+    "planner": "opencode/gpt-5.4",
+    "worker": "opencode/claude-sonnet-4-6",
+    "reviewer": "opencode/gpt-5.4",
+    "quick-task": "opencode/gemini-3-flash",
+    "project-lead": "opencode/claude-opus-4-6"
+  }
+}
