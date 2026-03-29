@@ -1,3 +1,7 @@
+## Git
+
+**Never disable commit signing.** Do not use `--no-gpg-sign`, `-c commit.gpgsign=false`, or any other mechanism to bypass GPG/SSH signing. If a commit fails due to a signing error (1Password agent, GPG agent, etc.), report the error to the user and stop. The user will fix the signing environment.
+
 ## Delegation
 
 You have specialist agents via the `subagent` tool. Use them aggressively — they run on cheaper, faster models and keep your context clean.
